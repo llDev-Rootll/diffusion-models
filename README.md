@@ -1,6 +1,13 @@
+
 # improved-diffusion
 
 This is the codebase for [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672).
+
+Libraries:
+
+    pip install tfrecord
+    pip install protobuf==3.19.4
+
 
 # Usage
 
@@ -23,6 +30,18 @@ The training code reads images from a directory of image files. In the [datasets
 For creating your own dataset, simply dump all of your images into a directory with ".jpg", ".jpeg", or ".png" extensions. If you wish to train a class-conditional model, name the files like "mylabel1_XXX.jpg", "mylabel2_YYY.jpg", etc., so that the data loader knows that "mylabel1" and "mylabel2" are the labels. Subdirectories will automatically be enumerated as well, so the images can be organized into a recursive structure (although the directory names will be ignored, and the underscore prefixes are used as names).
 
 The images will automatically be scaled and center-cropped by the data-loading pipeline. Simply pass `--data_dir path/to/images` to the training script, and it will take care of the rest.
+
+### Long Tail CIFAR10
+From [Class-Balanced Loss Based on Effective Number of Samples](https://github.com/richardaecn/class-balanced-loss):
+ Long-Tailed [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html). We provide [a download link](https://drive.google.com/file/d/1NY3lWYRfsTWfsjFPxJUlPumy-WFeD7zK/) that includes all the data used in our paper in .tfrecords format.
+
+To create images run: 
+
+    cd datasets
+    python cifar10_long_tail.py
+
+Note:
+The train and eval images from data/cifar-10-data-im-0.1 are dumped and saved in this [link](https://drive.google.com/file/d/1AYd5gv70Pn1C8eEq66lDppgMYuxHQKQH/view?usp=sharing).
 
 ## Training
 
@@ -74,6 +93,7 @@ Just like for training, you can run `image_sample.py` through MPI to use multipl
 You can change the number of sampling steps using the `--timestep_respacing` argument. For example, `--timestep_respacing 250` uses 250 steps to sample. Passing `--timestep_respacing ddim250` is similar, but uses the uniform stride from the [DDIM paper](https://arxiv.org/abs/2010.02502) rather than our stride.
 
 To sample using [DDIM](https://arxiv.org/abs/2010.02502), pass `--use_ddim True`.
+
 
 ## Models and Hyperparameters
 
@@ -144,3 +164,4 @@ MODEL_FLAGS="--image_size 32 --num_channels 128 --num_res_blocks 3 --learn_sigma
 DIFFUSION_FLAGS="--diffusion_steps 4000 --noise_schedule cosine --use_kl True"
 TRAIN_FLAGS="--lr 1e-4 --batch_size 128 --schedule_sampler loss-second-moment"
 ```
+

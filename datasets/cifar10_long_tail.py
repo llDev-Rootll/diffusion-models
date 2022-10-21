@@ -36,11 +36,11 @@ def main():
         k = 0
         transform = T.ToPILImage()
 
-        for j, data in tqdm(enumerate(loader)):
+        for _, data in tqdm(enumerate(loader)):
             batch_imgs = data['image']
             batch_lables = data['label']
 
-            # iterate over 32 items() batch size
+            # iterate over 32 items: batch size
             for i, l in enumerate(batch_lables):
                 filename = os.path.join(out_dir, f"{CLASSES[l]}_{k:05d}.png")
                 cur_img = batch_imgs[i]
