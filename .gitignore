@@ -4,6 +4,7 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 __pycache__
+cifar*
 # Other files and folders
 .settings/
 
@@ -15,6 +16,7 @@ __pycache__
 
 #pytorch weights
 *.pt
+
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
 # information for Eclipse / Flash Builder.

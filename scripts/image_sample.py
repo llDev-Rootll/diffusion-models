@@ -39,13 +39,15 @@ def main():
     logger.log("sampling...")
     all_images = []
     all_labels = []
+    truck = [555, 569, 717, 864, 867]
+
     while len(all_images) * args.batch_size < args.num_samples:
         model_kwargs = {}
         if args.class_cond:
             # classes = th.randint(
             #     low=0, high=NUM_CLASSES, size=(args.batch_size,), device=dist_util.dev()
             # )
-            classes = th.cuda.LongTensor([468]*args.batch_size) # Example to generate Crane (Class 242 from image net)
+            classes = th.cuda.LongTensor(np.random.choice(truck, args.batch_size)) # Example to generate Crane (Class 242 from image net)
             model_kwargs["y"] = classes
             print("Model",model_kwargs['y'])
             print("Classes",classes)
@@ -98,8 +100,8 @@ def main():
 def create_argparser():
     defaults = dict(
         clip_denoised=True,
-        num_samples=2,
-        batch_size=2,
+        num_samples=32,
+        batch_size=32,
         use_ddim=False,
         model_path="",
     )
