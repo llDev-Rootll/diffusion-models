@@ -1,3 +1,9 @@
+# Mods
+
+*Modified `image_sample.py `to taken hardcoded classes for class conditioning
+*added `dataset_stat.py` to check distribution of newly created datasets. Expects two train and test directories inside the dataset folder. Paths and names might need to be modified as they are currently hardcoded.
+
+____________________________________________________________________
 # improved-diffusion
 
 This is the codebase for [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672).
