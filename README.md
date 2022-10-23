@@ -1,21 +1,6 @@
-
-  
-
 # improved-diffusion
 
-  
-
 This is the codebase for [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672).
-
-  
-
-Libraries to be installed for reading data:
-```
-pip install tfrecord
-pip install protobuf==3.19.4
-```
-  
-  
 
 # Usage
 This section of the README walks through how to train and sample from a model.
@@ -39,8 +24,11 @@ From [Class-Balanced Loss Based on Effective Number of Samples](https://github.c
 
 Long-Tailed [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html). We provide [a download link](https://drive.google.com/file/d/1NY3lWYRfsTWfsjFPxJUlPumy-WFeD7zK/) that includes all the data used in our paper in .tfrecords format.
 
-  
-
+#### Libraries to be installed for reading data:
+```
+pip install tfrecord
+pip install protobuf==3.19.4
+```
 #### To create images for all classes:
 ```
 cd datasets
@@ -56,13 +44,15 @@ python cifar10_long_tail_imagefolder.py
 ```
 Note:
 The train and eval per class images from data/cifar-10-data-im-0.1 are dumped and saved in this [link](https://drive.google.com/file/d/1iyuSEB6mHFu80IzDtJAJrm8KoaGJ3kQ8/view?usp=sharing).
-  
+
+#### Extract and dump new samples in class folders:
+Go to README of resnet_eval for more. [link](https://github.com/llDev-Rootll/diffusion-models/blob/adiram/long_tail_cifar_ddpm/resnet_eval/README.md)
+
 
 ## Training
 
 To train your model, you should first decide some hyperparameters. We will split up our hyperparameters into three groups: model architecture, diffusion process, and training flags. Here are some reasonable defaults for a baseline:
 
-  
 ```
 MODEL_FLAGS="--image_size 64 --num_channels 128 --num_res_blocks 3"
 DIFFUSION_FLAGS="--diffusion_steps 4000 --noise_schedule linear"
