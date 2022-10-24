@@ -1,12 +1,9 @@
-filepath = "./samples_128x64x64x3.npz"
-
 from pydoc import classname
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 from tqdm.auto import tqdm
 
-    
 def extract_npz(filepath):
     data = np.load(filepath)
     images = data['arr_0']
@@ -17,6 +14,8 @@ def save_images(images, num, label, folder):
     for i in tqdm(range(len(images))):
         # i += num
         num += 1
+        if(num > 500):
+            break
         image = images[i]
        
         filename = folder + str(label)+ "_" + str(num) + ".png"
@@ -26,7 +25,7 @@ def save_images(images, num, label, folder):
     print(num)
     return num
         
-class_name = 'ship'
+class_name = 'truck'
 directory = './' + class_name
 new_folder = './' + class_name + '_new'
 i = 0
@@ -49,3 +48,5 @@ for file in os.listdir(directory):
     images, labels = extract_npz(filepath)
     
     i = save_images(images, i, class_name, "./" + class_name + "_new/")
+    if(i > 500):
+        break
