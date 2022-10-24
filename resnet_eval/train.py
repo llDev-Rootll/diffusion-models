@@ -77,7 +77,7 @@ if __name__ == '__main__':
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
     # Start the training.
-    epochs = 1
+    # epochs = 1
     for epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc = train(
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     per_class_accuracy_w_names = {cls_name:val.cpu().numpy().item() for cls_name, val in zip(class_to_idx, per_class_accuracy)}
     print(per_class_accuracy_w_names)
     print('TRAINING COMPLETE')
-    results_name = f"results_{TIMESTR}_{DATASET_NAME}"
+    results_name = f"results_{DATASET_NAME}_{TIMESTR}"
     results_path = os.path.join(train_params["results_path"], results_name+".json")
     if not os.path.exists(results_path):
         os.mkdir(results_path)
