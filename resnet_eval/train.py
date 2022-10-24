@@ -1,3 +1,4 @@
+from sklearn.metrics import confusion_matrix
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -81,7 +82,7 @@ if __name__ == '__main__':
             criterion,
             device
         )
-        valid_epoch_loss, valid_epoch_acc, per_class_accuracy = validate(
+        valid_epoch_loss, valid_epoch_acc, per_class_accuracy, confusion_matrix = validate(
             model, 
             valid_loader, 
             criterion,
@@ -121,9 +122,9 @@ if __name__ == '__main__':
         with open(os.path.join(results_path, "config.json"), "w") as outfile:
             json.dump(train_params, outfile)
         
-        print(np.array(list(per_class_accuracy_w_names.values()))[ORDER])
         plt.bar(np.array(list(per_class_accuracy_w_names.keys()))[ORDER], np.array(list(per_class_accuracy_w_names.values()))[ORDER])
         plt.title(DATASET_NAME)
         plt.xlabel('Classes')
         plt.ylabel('Accuracy')
         plt.savefig(os.path.join(os.path.join(results_path, results_name+'_acc.png')))
+        np.save(os.path.join(os.path.join(results_path, "confusion_matrix.npy")), confusion_matrix)

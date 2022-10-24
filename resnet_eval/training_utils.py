@@ -71,4 +71,4 @@ def validate(model, testloader, criterion, device, nb_classes=10):
     # print("Per class loss: ",running_loss_per_class)
     per_class_accu = confusion_matrix.diag()/confusion_matrix.sum(1)
     # print("Per class accuracy: ",confusion_matrix.diag()/confusion_matrix.sum(1))
-    return epoch_loss, epoch_acc, per_class_accu
+    return epoch_loss, epoch_acc, per_class_accu, confusion_matrix
