@@ -1,4 +1,4 @@
-from sklearn.metrics import confusion_matrix
+# from sklearn.metrics import confusion_matrix
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -32,17 +32,22 @@ torch.backends.cudnn.benchmark = True
 np.random.seed(seed)
 random.seed(seed)
 
-f = open("resnet_eval/train_configs/initial_config.json")
+f = open("./train_configs/initial_config.json")
 train_params = json.load(f)
+
 # Learning and training parameters.
 epochs = train_params["epochs"]
 batch_size = train_params["batch_size"]
 learning_rate = train_params["learning_rate"]
 DATASET_PATH = train_params["dataset_path"]
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 train_transforms = transforms.Compose([transforms.Resize(32),transforms.ToTensor()])
 
-train_loader, valid_loader, class_to_idx = load_data_set(batch_size=batch_size, train_data_dir=os.path.join(DATASET_PATH, "train"), valid_data_dir=os.path.join(DATASET_PATH, "test"), transforms=train_transforms)
+train_set = os.path.join(DATASET_PATH, "train")
+val_set = os.path.join(DATASET_PATH, "eval")
+
+train_loader, valid_loader, class_to_idx = load_data_set(batch_size=batch_size, train_data_dir=train_set, valid_data_dir=val_set, transforms=train_transforms)
 
 # Define model based on the argument parser string.
 if args['model'] == 'scratch':
@@ -72,7 +77,7 @@ if __name__ == '__main__':
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
     # Start the training.
-    # epochs = 1
+    epochs = 1
     for epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc = train(
@@ -96,7 +101,12 @@ if __name__ == '__main__':
         print(f"Training loss: {train_epoch_loss:.3f}, training acc: {train_epoch_acc:.3f}")
         print(f"Validation loss: {valid_epoch_loss:.3f}, validation acc: {valid_epoch_acc:.3f}")
         print('-'*50)
-        
+
+    accuracy = {'train_acc':train_epoch_acc, 'eval_acc':valid_epoch_acc}
+    loss = {'train_loss':train_epoch_loss, 'eval_loss':valid_epoch_loss}
+
+    accuracy_ep = {'train_acc_per_ep':train_acc, 'eval_acc_per_ep':valid_acc}
+    loss_ep = {'train_loss_per_ep':train_loss, 'eval_loss_per_ep':valid_loss}
     # Save the loss and accuracy plots.
     # save_plots(
     #     train_acc, 
@@ -118,6 +128,10 @@ if __name__ == '__main__':
         os.mkdir(results_path)
         with open(os.path.join(results_path, results_name+".json"), "w") as outfile:
             json.dump(per_class_accuracy_w_names, outfile)
+            json.dump(accuracy, outfile)
+            json.dump(loss, outfile)
+            json.dump(accuracy_ep, outfile)
+            json.dump(loss_ep, outfile)
         
         with open(os.path.join(results_path, "config.json"), "w") as outfile:
             json.dump(train_params, outfile)
@@ -128,3 +142,13 @@ if __name__ == '__main__':
         plt.ylabel('Accuracy')
         plt.savefig(os.path.join(os.path.join(results_path, results_name+'_acc.png')))
         np.save(os.path.join(os.path.join(results_path, "confusion_matrix.npy")), confusion_matrix)
+
+        class_names = np.array(sorted(os.listdir(train_set)))[ORDER]
+        dist = {cls_name:len(os.listdir(os.path.join(train_set, cls_name))) for cls_name in class_names}
+        plt.figure("Training Set")
+        plt.bar(dist.keys(), dist.values(), color=['blue'])
+    
+        plt.xlabel('Classes')
+        plt.ylabel('Number of Samples')
+        plt.savefig(os.path.join(os.path.join(results_path, results_name + '_dist.png')))
+        plt.show()
