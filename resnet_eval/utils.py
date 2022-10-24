@@ -8,21 +8,23 @@ from torchvision.transforms import ToTensor
 plt.style.use('ggplot')
 
 
-def get_im_data(batch_size=64):
+def load_data_set(batch_size, train_data_dir, valid_data_dir, transforms):
+    """Load generic/syth datasets 
+    """
 
-    train_data_dir = "./per_class_data/cifar_im_0.1_train/"
-    dataset_train = datasets.ImageFolder(root=train_data_dir, transform=ToTensor())
+    dataset_train = datasets.ImageFolder(root=train_data_dir, transform=transforms)
     train_loader = DataLoader(dataset=dataset_train, batch_size=batch_size, shuffle=True)
 
-    valid_data_dir = "./per_class_data/cifar_im_0.1_eval/"
-    dataset_valid = datasets.ImageFolder(root=valid_data_dir, transform=ToTensor())
-    valid_loader = DataLoader(dataset=dataset_valid, batch_size=batch_size, shuffle=False)
+    dataset_valid = datasets.ImageFolder(root=valid_data_dir, transform=transforms)
+    valid_loader = DataLoader(dataset=dataset_valid, batch_size=batch_size, shuffle=True)
 
-    return train_loader, valid_loader
+    assert(dataset_train.class_to_idx==dataset_valid.class_to_idx)
+    
+    return train_loader, valid_loader, dataset_train.class_to_idx
 
 
 
-def get_data(batch_size=64):
+def get_original_cifar_data(batch_size=64):
 
     
     # CIFAR10 training dataset.

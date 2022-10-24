@@ -1,0 +1,7 @@
+{
+"epochs" : 30,
+"batch_size" : 2000,
+"learning_rate" : 0.01,
+"dataset_path" : "cifar_im_truck800",
+"results_path" : "resnet_eval/outputs"
+}

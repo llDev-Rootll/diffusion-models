@@ -4,6 +4,8 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 __pycache__
+cifar*
+results*
 # Other files and folders
 .settings/
 

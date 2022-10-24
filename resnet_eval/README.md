@@ -22,4 +22,7 @@ Dataset link: [here](https://drive.google.com/drive/folders/1D6IXzvn9Yg6L3dPGfw9
 
 These new samples will get added to the train folder in our [per_class_data](https://drive.google.com/file/d/1iyuSEB6mHFu80IzDtJAJrm8KoaGJ3kQ8/view?usp=sharing).
 
+## Running training using config and seeing experiment result folders
+
+Run training as before. But training params can be set by setting `train_config/initial_config.json`. Outputs for each experiment show up as a `results_*.json`, plot of per class accuracy and a `config.json` which shows the config that training job was run with. Each successful experiment creates a unique results directory.
 
