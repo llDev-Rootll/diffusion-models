@@ -1,7 +1,7 @@
 {
 "epochs" : 30,
-"batch_size" : 64,
+"batch_size" : 512,
 "learning_rate" : 0.01,
-"dataset_path" : "./dataset/cifar_im_ship_500",
-"results_path" : "./outputs"
+"dataset_path" : "cifar_im_truck500",
+"results_path" : "./resnet_eval/outputs"
 }
