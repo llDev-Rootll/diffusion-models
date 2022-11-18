@@ -43,6 +43,8 @@ def main():
     ship = [724,510]
     i = 0
     while len(all_images) * args.batch_size < args.num_samples:
+        cur_batch = []
+        cur_labels = []
         model_kwargs = {}
         if args.class_cond:
             # classes = th.randint(
@@ -68,20 +70,25 @@ def main():
         gathered_samples = [th.zeros_like(sample) for _ in range(dist.get_world_size())]
         dist.all_gather(gathered_samples, sample)  # gather not supported with NCCL
         all_images.extend([sample.cpu().numpy() for sample in gathered_samples])
+        cur_batch.extend([sample.cpu().numpy() for sample in gathered_samples])
         if args.class_cond:
             gathered_labels = [
                 th.zeros_like(classes) for _ in range(dist.get_world_size())
             ]
             dist.all_gather(gathered_labels, classes)
-            all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
-        logger.log(f"created {len(all_images) * args.batch_size} samples")
+            # all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
+            cur_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
+        #logger.log(f"created {len(all_images) * args.batch_size} samples")
+        logger.log(f"created {len(cur_batch) * args.batch_size} samples")
 
-        arr = np.concatenate(all_images, axis=0)
+        # arr = np.concatenate(all_images, axis=0)
+        arr = np.concatenate(cur_batch, axis=0)
         arr = arr[: args.num_samples]
         tmp = arr[0]
         # plt.imshow(tmp); plt.show()
         if args.class_cond:
-            label_arr = np.concatenate(all_labels, axis=0)
+            # label_arr = np.concatenate(all_labels, axis=0)
+            label_arr = np.concatenate(cur_labels, axis=0)
             label_arr = label_arr[: args.num_samples]
             print("Cond Label",label_arr)
             print("Num Samples:",args.num_samples)
