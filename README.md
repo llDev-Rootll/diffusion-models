@@ -1,8 +1,13 @@
 # Mods
 
 *Modified `image_sample.py `to taken hardcoded classes for class conditioning
+
 *added `dataset_stat.py` to check distribution of newly created datasets. Expects two train and test directories inside the dataset folder. Paths and names might need to be modified as they are currently hardcoded.
 
+Sample:
+```
+python3 scripts/image_sample.py --image_size 64 --num_channels 192 --num_res_blocks 3 --learn_sigma True --class_cond True --diffusion_steps 4000 --noise_schedule cosine --rescale_learned_sigmas False --rescale_timesteps False --model_path imagenet64_cond_270M_250K.pt
+```
 ____________________________________________________________________
 # improved-diffusion
 

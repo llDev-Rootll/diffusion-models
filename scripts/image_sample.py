@@ -41,15 +41,16 @@ def main():
     all_labels = []
     truck = [555, 569, 717, 864, 867]
     ship = [724,510]
+    i = 0
     while len(all_images) * args.batch_size < args.num_samples:
         model_kwargs = {}
         if args.class_cond:
             # classes = th.randint(
             #     low=0, high=NUM_CLASSES, size=(args.batch_size,), device=dist_util.dev()
             # )
-            classes = th.cuda.LongTensor(np.random.choice(ship, args.batch_size)) # Example to generate Crane (Class 242 from image net)
+            classes = th.cuda.LongTensor(np.random.choice([555], args.batch_size)) # Example to generate Crane (Class 242 from image net)
             model_kwargs["y"] = classes
-            print("Model",model_kwargs['y'])
+            # print("Model",model_kwargs['y'])
             print("Classes",classes)
         sample_fn = (
             diffusion.p_sample_loop if not args.use_ddim else diffusion.ddim_sample_loop
@@ -75,23 +76,25 @@ def main():
             all_labels.extend([labels.cpu().numpy() for labels in gathered_labels])
         logger.log(f"created {len(all_images) * args.batch_size} samples")
 
-    arr = np.concatenate(all_images, axis=0)
-    arr = arr[: args.num_samples]
-    tmp = arr[0]
-    plt.imshow(tmp); plt.show()
-    if args.class_cond:
-        label_arr = np.concatenate(all_labels, axis=0)
-        label_arr = label_arr[: args.num_samples]
-        print("Cond Label",label_arr)
-        print("Num Samples:",args.num_samples)
-    if dist.get_rank() == 0:
-        shape_str = "x".join([str(x) for x in arr.shape])
-        out_path = os.path.join(logger.get_dir(), f"samples_{shape_str}.npz")
-        logger.log(f"saving to {out_path}")
+        arr = np.concatenate(all_images, axis=0)
+        arr = arr[: args.num_samples]
+        tmp = arr[0]
+        # plt.imshow(tmp); plt.show()
         if args.class_cond:
-            np.savez(out_path, arr, label_arr)
-        else:
-            np.savez(out_path, arr)
+            label_arr = np.concatenate(all_labels, axis=0)
+            label_arr = label_arr[: args.num_samples]
+            print("Cond Label",label_arr)
+            print("Num Samples:",args.num_samples)
+        if dist.get_rank() == 0:
+            shape_str = "x".join([str(x) for x in arr.shape])
+            out_path = os.path.join(logger.get_dir(), f"samples_555_{i}_{shape_str}.npz")
+            logger.log(f"saving to {out_path}")
+            if args.class_cond:
+                np.savez(out_path, arr, label_arr)
+            else:
+                np.savez(out_path, arr)
+        i += 1
+        # print('samples saved in ', out_path)
 
     dist.barrier()
     logger.log("sampling complete")
