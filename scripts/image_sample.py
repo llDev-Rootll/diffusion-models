@@ -45,7 +45,7 @@ def main():
             # classes = th.randint(
             #     low=0, high=NUM_CLASSES, size=(args.batch_size,), device=dist_util.dev()
             # )
-            classes = th.cuda.LongTensor([1]*args.batch_size) # Example to generate Crane (Class 242 from image net)
+            classes = th.cuda.LongTensor([5]*args.batch_size) # Example to generate Crane (Class 242 from image net)
             model_kwargs["y"] = classes
             print("Model",model_kwargs['y'])
             print("Classes",classes)

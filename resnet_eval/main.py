@@ -6,8 +6,22 @@ from torchvision import transforms
 
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.utils import save_image
+batch_size=1
 
-batch_size=10
+# classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+CLASSES = (
+    "plane",
+    "car",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
+)
 
 class convNet(nn.Module):
     def __init__(self):
@@ -64,7 +78,10 @@ def test(model,test_loader):
         print("preds:",pred)
 
         for idx in range(len(labels)):
-            label = labels[idx]
+            img1 = images[idx] 
+            label = pred[idx]
+            l = CLASSES[label]
+            save_image(img1, 'dataset/labeled_synth/'+l+"_{:05d}".format(i)+'.png')
             class_correct[label] += correct[idx].item()
             class_total[label] += 1
         i +=1
@@ -84,6 +101,4 @@ model_2.load_state_dict(torch.load('./model/convNet_model.pth'))
 
 print(model_2.state_dict)
 test(model_2,test_loader)
-
-# classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
