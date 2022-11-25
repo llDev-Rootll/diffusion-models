@@ -7,8 +7,8 @@ from tqdm.auto import tqdm
 def extract_npz(filepath):
     data = np.load(filepath)
     images = data['arr_0']
-    labels = data['arr_1']
-    return images, labels
+    # labels = data['arr_1']
+    return images
 
 def save_images(images, num, label, folder):
     for i in tqdm(range(len(images))):
@@ -25,7 +25,7 @@ def save_images(images, num, label, folder):
     print(num)
     return num
         
-class_name = 'truck'
+class_name = '1'
 directory = './' + class_name
 new_folder = './' + class_name + '_new'
 i = 0
@@ -45,7 +45,7 @@ else:
 for file in os.listdir(directory):
     filepath = directory+'/'+file
     print(filepath)
-    images, labels = extract_npz(filepath)
+    images = extract_npz(filepath)
     
     i = save_images(images, i, class_name, "./" + class_name + "_new/")
     if(i > 500):
