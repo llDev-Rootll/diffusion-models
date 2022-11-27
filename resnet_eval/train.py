@@ -71,7 +71,8 @@ print(f"{total_trainable_params:,} training parameters.")
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 # Loss function.
 criterion = nn.CrossEntropyLoss()
-
+best_model = model
+best_val = 0
 if __name__ == '__main__':
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
@@ -100,7 +101,13 @@ if __name__ == '__main__':
         valid_acc.append(valid_epoch_acc)
         print(f"Training loss: {train_epoch_loss:.3f}, training acc: {train_epoch_acc:.3f}")
         print(f"Validation loss: {valid_epoch_loss:.3f}, validation acc: {valid_epoch_acc:.3f}")
+
+        if(valid_epoch_acc >= best_val):
+            print("##### Saving Model #####")
+            best_val = valid_epoch_acc
+            best_model = model
         print('-'*50)
+        
 
     accuracy = {'train_acc':train_epoch_acc, 'eval_acc':valid_epoch_acc}
     loss = {'train_loss':train_epoch_loss, 'eval_loss':valid_epoch_loss}
@@ -126,13 +133,14 @@ if __name__ == '__main__':
     results_path = os.path.join(train_params["results_path"], results_name+".json")
     if not os.path.exists(results_path):
         os.mkdir(results_path)
-        with open(os.path.join(results_path, results_name+".json"), "w") as outfile:
+        with open(os.path.join(results_path, results_name + ".json"), "w") as outfile:
             json.dump(per_class_accuracy_w_names, outfile)
-
         
         with open(os.path.join(results_path, "config.json"), "w") as outfile:
             json.dump(train_params, outfile)
-        
+
+        torch.save(best_model.state_dict(), os.path.join(results_path, "model.pt"))
+
         plt.bar(np.array(list(per_class_accuracy_w_names.keys()))[ORDER], np.array(list(per_class_accuracy_w_names.values()))[ORDER])
         plt.title(DATASET_NAME)
         plt.xlabel('Classes')
@@ -149,6 +157,7 @@ if __name__ == '__main__':
         plt.ylabel('Number of Samples')
         plt.savefig(os.path.join(os.path.join(results_path, results_name + '_dist.png')))
         plt.figure("ACC")
-        print(valid_acc)
+        # print(valid_acc)
         plt.plot(valid_acc)
+        
         plt.show()

@@ -2,6 +2,6 @@
 "epochs" : 100,
 "batch_size" : 256,
 "learning_rate" : 0.01,
-"dataset_path" : "cifar10",
-"results_path" : "./resnet_eval/outputs"
+"dataset_path" : "./resnet_eval/dataset/cifar10_real/",
+"results_path" : "./resnet_eval/outputs/"
 }

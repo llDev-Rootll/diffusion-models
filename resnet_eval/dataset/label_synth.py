@@ -7,9 +7,16 @@ from torchvision import transforms
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.utils import save_image
-batch_size=1
+import os
 
-# classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+batch_size = 10
+
+folder = 'cifar_uncond1'
+read_folder = os.path.join("./cifar_uncond_img", folder)
+write_folder = os.path.join("./cifar_uncond_label", folder + '_label')
+print("read_folder:", read_folder)
+print("write_folder:", write_folder)
+
 CLASSES = (
     "plane",
     "car",
@@ -41,7 +48,6 @@ class convNet(nn.Module):
         self.fc2=nn.Linear(128,64)
         self.out=nn.Linear(64,10)
 
-
     def forward(self,x):
         x=self.pool(F.relu(self.b1(self.conv1(x))))
         x=self.pool(F.relu(self.conv2(x)))
@@ -54,51 +60,42 @@ class convNet(nn.Module):
         x=self.dropout(F.relu(self.fc2(x)))
         x=self.out(x)   
         return x
-model_2=convNet()
 
-def test(model,test_loader):
-    test_loss=0
+model_2 = convNet()
+
+def test(model, test_loader):
     class_correct = list(0. for i in range(10))
     class_total = list(0. for i in range(10))
 
     model.eval() # test the model with dropout layers off
-    i =0
+    i = 0
     for images,labels in test_loader:
-        # if i == 5:
-        #     break
-        # if use_cuda and torch.cuda.is_available():
-        #     images,labels=images.cuda(),labels.cuda()
-        output=model(images)
-        # loss=criterion(output,labels)
-        # test_loss+=loss.item()
-        _,pred=torch.max(output,1)
+        output = model(images)
+        _, pred = torch.max(output, 1)
         correct = np.squeeze(pred.eq(labels.data.view_as(pred)))
-
-        # print("\nlabel:", labels)
-        print("preds:",pred)
 
         for idx in range(len(labels)):
             img1 = images[idx] 
             label = pred[idx]
             l = CLASSES[label]
-            save_image(img1, 'dataset/labeled_synth/'+l+"_{:05d}".format(i)+'.png')
+            img_path = os.path.join(write_folder, l + "_u_{:05d}".format(i) + '.png')
+            save_image(img1, img_path)
             class_correct[label] += correct[idx].item()
             class_total[label] += 1
-        i +=1
-
-
-    print(f"Correctly predicted per class : {class_correct}, Total correctly perdicted : {sum(class_correct)}")
+        i += 1
+    # print(f"Correctly predicted per class : {class_correct}, Total correctly perdicted : {sum(class_correct)}")
     print(f"Total Predictions per class : {class_total}, Total predictions to be made : {sum(class_total)}\n")
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 ])
-dataset_valid = datasets.ImageFolder(root="./dataset/cifar_uncond_img/", transform=transform_test)
-test_loader = DataLoader(dataset=dataset_valid, batch_size=10)
+
+dataset_valid = datasets.ImageFolder(root = read_folder, transform = transform_test)
+test_loader = DataLoader(dataset = dataset_valid, batch_size = batch_size)
 
 model_2.load_state_dict(torch.load('./model/convNet_model.pth'))
 
-print(model_2.state_dict)
-test(model_2,test_loader)
+# print(model_2.state_dict)
+test(model_2, test_loader)
 
