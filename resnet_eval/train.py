@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
+import torchvision
 import argparse
 import numpy as np
 import random
@@ -39,7 +40,11 @@ CLASSES = np.array([
     "ship",
     "truck",
 ])
-
+def imshow(img):
+    img = img / 2 + 0.5     # unnormalize
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+    plt.show()
 # Set seed.
 seed = 42
 torch.manual_seed(seed)
@@ -66,8 +71,16 @@ train_transforms = transforms.Compose([transforms.Resize(32),transforms.ToTensor
 train_set_path = TRAIN_DATASET_PATH #os.path.join(TRAIN_DATASET_PATH, "train")
 val_set_path = TEST_DATASET_PATH #os.path.join(TEST_DATASET_PATH, "test")
 
-train_loader, valid_loader, class_to_idx = load_data_set(batch_size=batch_size, train_data_dir=train_set_path, valid_data_dir=val_set_path, transforms=train_transforms)
+train_loader, valid_loader, class_to_idx, cidx = load_data_set(batch_size=batch_size, train_data_dir=train_set_path, valid_data_dir=val_set_path, transforms=train_transforms)
 
+# dataiter = iter(train_loader)
+# images, labels = next(dataiter)
+# print(class_to_idx)
+# print(cidx)
+# print(labels)
+# imshow(torchvision.utils.make_grid(images))
+
+# exit(0)
 # Define model based on the argument parser string.
 if args['model'] == 'scratch':
     print('[INFO]: Training ResNet18 built from scratch...')
@@ -86,7 +99,8 @@ total_trainable_params = sum(
 print(f"{total_trainable_params:,} training parameters.")
 
 # Optimizer.
-optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, weight_decay=5e-4)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200)
 # Loss function.
 criterion = nn.CrossEntropyLoss()
 # best_model = model
@@ -112,6 +126,7 @@ if __name__ == '__main__':
             criterion,
             device
         )
+        scheduler.step()
         print(per_class_accuracy)
         train_loss.append(train_epoch_loss)
         valid_loss.append(valid_epoch_loss)

@@ -10,7 +10,7 @@ def train(model, trainloader, optimizer, criterion, device):
     train_running_correct = 0
     counter = 0
     for _, data in tqdm(enumerate(trainloader), total=len(trainloader)):
-        
+        counter+=1
         image, labels = data
         image = image.to(device)
         labels = labels.to(device)
@@ -22,6 +22,7 @@ def train(model, trainloader, optimizer, criterion, device):
         train_running_loss += loss.item()
         # Calculate the accuracy.
         _, preds = torch.max(outputs.data, 1)
+        
         train_running_correct += (preds == labels).sum().item()
         # Backpropagation
         loss.backward()
