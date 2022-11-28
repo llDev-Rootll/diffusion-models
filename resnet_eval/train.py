@@ -20,7 +20,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '-m', '--model', default='scratch',
     help='choose model built from scratch or the Torchvision model',
-    choices=['scratch', 'torchvision']
+    choices=['scratch', 'torchvision'],
+)
+parser.add_argument(
+    '-c', '--config', default='./resnet_eval/train_configs/initial_config.json',
+    help='path to train config',
 )
 args = vars(parser.parse_args())
 CLASSES = np.array([
@@ -45,7 +49,7 @@ torch.backends.cudnn.benchmark = True
 np.random.seed(seed)
 random.seed(seed)
 
-f = open("./resnet_eval/train_configs/initial_config.json")
+f = open(args["config"])
 train_params = json.load(f)
 
 # Learning and training parameters.

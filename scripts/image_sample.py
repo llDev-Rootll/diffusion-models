@@ -50,7 +50,7 @@ def main():
             # classes = th.randint(
             #     low=0, high=NUM_CLASSES, size=(args.batch_size,), device=dist_util.dev()
             # )
-            classes = th.cuda.LongTensor(np.random.choice([555], args.batch_size)) # Example to generate Crane (Class 242 from image net)
+            classes = th.cuda.LongTensor(np.random.choice([8], args.batch_size)) # Example to generate Crane (Class 242 from image net)
             model_kwargs["y"] = classes
             # print("Model",model_kwargs['y'])
             print("Classes",classes)
@@ -85,7 +85,7 @@ def main():
         arr = np.concatenate(cur_batch, axis=0)
         arr = arr[: args.num_samples]
         tmp = arr[0]
-        # plt.imshow(tmp); plt.show()
+        plt.imshow(tmp); plt.show()
         if args.class_cond:
             # label_arr = np.concatenate(all_labels, axis=0)
             label_arr = np.concatenate(cur_labels, axis=0)
@@ -95,7 +95,8 @@ def main():
         if dist.get_rank() == 0:
             shape_str = "x".join([str(x) for x in arr.shape])
             TIMESTR = time.strftime("%Y%m%d-%H%M%S")
-            out_path = os.path.join("./datasets/uncond_data", f"samples_{i}_{shape_str}_{TIMESTR}.npz")
+            out_path = os.path.join("./cifar_unc_samples", f"samples_{i}_{shape_str}_{TIMESTR}.npz")
+            # label_arr = np.concatenate(all_labels, axis=0)
 
             # out_path = os.path.join(logger.get_dir(), f"samples_555_{i}_{shape_str}_{TIMESTR}.npz")
             logger.log(f"saving to {out_path}")
@@ -111,10 +112,11 @@ def main():
 
 
 def create_argparser():
+    th.cuda.empty_cache()
     defaults = dict(
         clip_denoised=True,
-        num_samples = 8192,
-        batch_size = 256,
+        num_samples=10,
+        batch_size=1,
         use_ddim=False,
         model_path="",
     )
