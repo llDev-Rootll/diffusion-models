@@ -85,8 +85,8 @@ print(f"{total_trainable_params:,} training parameters.")
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 # Loss function.
 criterion = nn.CrossEntropyLoss()
-best_model = model
-best_val = 0
+# best_model = model
+# best_val = 0
 if __name__ == '__main__':
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
@@ -116,10 +116,10 @@ if __name__ == '__main__':
         print(f"Training loss: {train_epoch_loss:.3f}, training acc: {train_epoch_acc:.3f}")
         print(f"Validation loss: {valid_epoch_loss:.3f}, validation acc: {valid_epoch_acc:.3f}")
 
-        if(valid_epoch_acc >= best_val):
-            print("##### Saving Model #####")
-            best_val = valid_epoch_acc
-            best_model = model
+        # if(valid_epoch_acc >= best_val):
+        #     print("##### Saving Model #####")
+        #     best_val = valid_epoch_acc
+        #     best_model = model
         print('-'*50)
         
     accuracy = {'train_acc':train_epoch_acc, 'eval_acc':valid_epoch_acc}
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         with open(os.path.join(results_path, "config.json"), "w") as outfile:
             json.dump(train_params, outfile)
 
-        torch.save(best_model.state_dict(), os.path.join(results_path, "model.pt"))
+        torch.save(model.state_dict(), os.path.join(results_path, "model.pt"))
 
         plt.bar(np.array(list(per_class_accuracy_w_names.keys()))[ORDER], np.array(list(per_class_accuracy_w_names.values()))[ORDER])
         plt.title(TEST_DATASET_NAME)

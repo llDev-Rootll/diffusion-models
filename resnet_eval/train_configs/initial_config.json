@@ -1,8 +1,8 @@
 {
-"epochs" : 1,
+"epochs" : 100,
 "batch_size" : 256,
 "learning_rate" : 0.01,
-"train_dataset_path" : "./resnet_eval/dataset/cifar_ablation_sets/cifar_ablation50/",
+"train_dataset_path" : "./resnet_eval/dataset/cifar10_real/test/",
 "test_dataset_path" : "./resnet_eval/dataset/cifar10_real/test/",
 "results_path" : "./resnet_eval/outputs/"
 }
