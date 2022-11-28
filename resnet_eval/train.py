@@ -13,7 +13,8 @@ from resnet18_torchvision import build_model
 from training_utils import train, validate
 from utils import *
 import time
-
+import seaborn as sn
+import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -22,6 +23,18 @@ parser.add_argument(
     choices=['scratch', 'torchvision']
 )
 args = vars(parser.parse_args())
+CLASSES = np.array([
+    "plane",
+    "car",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
+])
 
 # Set seed.
 seed = 42
@@ -39,13 +52,15 @@ train_params = json.load(f)
 epochs = train_params["epochs"]
 batch_size = train_params["batch_size"]
 learning_rate = train_params["learning_rate"]
-DATASET_PATH = train_params["dataset_path"]
+TRAIN_DATASET_PATH = train_params["train_dataset_path"]
+TEST_DATASET_PATH = train_params["test_dataset_path"]
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 train_transforms = transforms.Compose([transforms.Resize(32),transforms.ToTensor()])
 
-train_set_path = os.path.join(DATASET_PATH, "train")
-val_set_path = os.path.join(DATASET_PATH, "test")
+train_set_path = TRAIN_DATASET_PATH #os.path.join(TRAIN_DATASET_PATH, "train")
+val_set_path = TEST_DATASET_PATH #os.path.join(TEST_DATASET_PATH, "test")
 
 train_loader, valid_loader, class_to_idx = load_data_set(batch_size=batch_size, train_data_dir=train_set_path, valid_data_dir=val_set_path, transforms=train_transforms)
 
@@ -58,7 +73,6 @@ if args['model'] == 'torchvision':
     print('[INFO]: Training the Torchvision ResNet18 model...')
     model = build_model(pretrained=False, fine_tune=True, num_classes=10).to(device) 
     plot_name = 'resnet_torchvision'
-# print(model)
 
 # Total parameters and trainable parameters.
 total_params = sum(p.numel() for p in model.parameters())
@@ -88,7 +102,7 @@ if __name__ == '__main__':
             criterion,
             device
         )
-        valid_epoch_loss, valid_epoch_acc, per_class_accuracy, confusion_matrix = validate(
+        valid_epoch_loss, valid_epoch_acc, per_class_accuracy, cf_matrix = validate(
             model, 
             valid_loader, 
             criterion,
@@ -108,29 +122,22 @@ if __name__ == '__main__':
             best_model = model
         print('-'*50)
         
-
     accuracy = {'train_acc':train_epoch_acc, 'eval_acc':valid_epoch_acc}
     loss = {'train_loss':train_epoch_loss, 'eval_loss':valid_epoch_loss}
 
     accuracy_ep = {'train_acc_per_ep':train_acc, 'eval_acc_per_ep':valid_acc}
     loss_ep = {'train_loss_per_ep':train_loss, 'eval_loss_per_ep':valid_loss}
-    # Save the loss and accuracy plots.
-    # save_plots(
-    #     train_acc, 
-    #     valid_acc, 
-    #     train_loss, 
-    #     valid_loss, 
-    #     name=plot_name
-    # )
+
     TIMESTR = time.strftime("%Y%m%d-%H%M%S")
     ORDER = [7, 1, 0, 2, 3, 4, 5, 6, 8, 9]
-    DATASET_NAME = DATASET_PATH.split("/")[-1]
+    TEST_DATASET_NAME = TEST_DATASET_PATH.split("/")[-1]
     
     per_class_accuracy_w_names = {cls_name:val.cpu().numpy().item() for cls_name, val in zip(class_to_idx, per_class_accuracy)}
     print(per_class_accuracy_w_names)
     print('TRAINING COMPLETE')
-    results_name = f"results_{DATASET_NAME}_{TIMESTR}"
+    results_name = f"results_{TEST_DATASET_NAME}_{TIMESTR}"
     results_path = os.path.join(train_params["results_path"], results_name+".json")
+
     if not os.path.exists(results_path):
         os.mkdir(results_path)
         with open(os.path.join(results_path, results_name + ".json"), "w") as outfile:
@@ -142,22 +149,32 @@ if __name__ == '__main__':
         torch.save(best_model.state_dict(), os.path.join(results_path, "model.pt"))
 
         plt.bar(np.array(list(per_class_accuracy_w_names.keys()))[ORDER], np.array(list(per_class_accuracy_w_names.values()))[ORDER])
-        plt.title(DATASET_NAME)
+        plt.title(TEST_DATASET_NAME)
         plt.xlabel('Classes')
         plt.ylabel('Accuracy')
         plt.savefig(os.path.join(os.path.join(results_path, results_name+'_acc.png')))
-        np.save(os.path.join(os.path.join(results_path, "confusion_matrix.npy")), confusion_matrix)
+
+        np.save(os.path.join(os.path.join(results_path, "confusion_matrix.npy")), cf_matrix)
 
         class_names = np.array(sorted(os.listdir(train_set_path)))[ORDER]
         dist = {cls_name:len(os.listdir(os.path.join(train_set_path, cls_name))) for cls_name in class_names}
-        plt.figure("Training Set")
+        # plt.figure("Training Set")
         plt.bar(dist.keys(), dist.values(), color=['blue'])
-    
         plt.xlabel('Classes')
         plt.ylabel('Number of Samples')
         plt.savefig(os.path.join(os.path.join(results_path, results_name + '_dist.png')))
-        plt.figure("ACC")
         # print(valid_acc)
-        plt.plot(valid_acc)
+
+        plt.figure("Overall Accuracy")
+        plt.plot(valid_acc, color='r', label='Test accuracy')
+        plt.plot(train_acc, color='g', label='Train accuracy')
+        plt.savefig(os.path.join(os.path.join(results_path, results_name + '_overall_accuracy.png')))
+        # plt.plot(valid_acc)
         
+        df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *10, index = [i for i in CLASSES],
+                        columns = [i for i in CLASSES])
+        plt.figure(figsize = (12,7))
+        sn.heatmap(df_cm, annot=True)
+        plt.savefig(os.path.join(os.path.join(results_path, results_name + '_cf.png')))
+
         plt.show()

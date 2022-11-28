@@ -4,18 +4,11 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision import transforms
 
+from tqdm.auto import tqdm
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.utils import save_image
 import os
-
-batch_size = 10
-
-folder = 'cifar_uncond1'
-read_folder = os.path.join("./cifar_uncond_img", folder)
-write_folder = os.path.join("./cifar_uncond_label", folder + '_label')
-print("read_folder:", read_folder)
-print("write_folder:", write_folder)
 
 CLASSES = (
     "plane",
@@ -61,41 +54,57 @@ class convNet(nn.Module):
         x=self.out(x)   
         return x
 
-model_2 = convNet()
-
 def test(model, test_loader):
     class_correct = list(0. for i in range(10))
     class_total = list(0. for i in range(10))
 
     model.eval() # test the model with dropout layers off
     i = 0
-    for images,labels in test_loader:
+    for images, labels in tqdm(test_loader):
         output = model(images)
         _, pred = torch.max(output, 1)
         correct = np.squeeze(pred.eq(labels.data.view_as(pred)))
 
         for idx in range(len(labels)):
+            # print()
             img1 = images[idx] 
             label = pred[idx]
             l = CLASSES[label]
-            img_path = os.path.join(write_folder, l + "_u_{:05d}".format(i) + '.png')
+            img_path = os.path.join(write_folder, l + "_u_{:04d}".format(i) + '.png')
             save_image(img1, img_path)
             class_correct[label] += correct[idx].item()
             class_total[label] += 1
-        i += 1
+            i += 1
     # print(f"Correctly predicted per class : {class_correct}, Total correctly perdicted : {sum(class_correct)}")
     print(f"Total Predictions per class : {class_total}, Total predictions to be made : {sum(class_total)}\n")
+
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 ])
 
+batch_size = 1000
+
+folder = 'cifar_uncond2'
+read_folder = os.path.join("./cifar_uncond_img", folder)
+write_folder = os.path.join("./cifar_uncond_label", folder + '_label')
+print("read_folder:", read_folder)
+print("write_folder:", write_folder)
+
+if not os.path.exists(write_folder):
+    os.mkdir(write_folder)
+
+print("Loading data...")
 dataset_valid = datasets.ImageFolder(root = read_folder, transform = transform_test)
 test_loader = DataLoader(dataset = dataset_valid, batch_size = batch_size)
+print(test_loader)
 
+print('Model extracted...')
+model_2 = convNet()
 model_2.load_state_dict(torch.load('./model/convNet_model.pth'))
 
+print('Labelling...')
 # print(model_2.state_dict)
 test(model_2, test_loader)
 

@@ -1,6 +1,6 @@
 import torch
 from tqdm import tqdm
-
+from sklearn.metrics import confusion_matrix
 
 # Training function.
 def train(model, trainloader, optimizer, criterion, device):
@@ -27,7 +27,6 @@ def train(model, trainloader, optimizer, criterion, device):
         loss.backward()
         # Update the weights.
         optimizer.step()
-        # break
     
     # Loss and accuracy for the complete epoch.
     epoch_loss = train_running_loss / counter
@@ -42,8 +41,9 @@ def validate(model, testloader, criterion, device, nb_classes=10):
     valid_running_loss = 0.0
     valid_running_correct = 0
     counter = 0
-    confusion_matrix = torch.zeros(nb_classes, nb_classes)
-
+    cf = torch.zeros(nb_classes, nb_classes)
+    y_true = []
+    y_pred = []
     with torch.no_grad():
         for i, data in tqdm(enumerate(testloader), total=len(testloader)):
             counter += 1
@@ -51,6 +51,7 @@ def validate(model, testloader, criterion, device, nb_classes=10):
             image, labels = data
             image = image.to(device)
             labels = labels.to(device)
+            y_true.extend(labels.cpu().numpy())
             # Forward pass.
             outputs = model(image)
             # Calculate the loss.
@@ -59,16 +60,18 @@ def validate(model, testloader, criterion, device, nb_classes=10):
             valid_running_loss += loss.item()
             # Calculate the accuracy.
             _, preds = torch.max(outputs.data, 1)
+            y_pred.extend(preds.cpu().numpy())
             valid_running_correct += (preds == labels).sum().item()
 
             for t, p in zip(labels.view(-1), preds.view(-1)):
-                confusion_matrix[t.long(), p.long()] += 1
-        
+                cf[t.long(), p.long()] += 1
+                
+    cf_matrix = confusion_matrix(y_true, y_pred)
     # Loss and accuracy for the complete epoch.
     epoch_loss = valid_running_loss / counter
     # print(len(testloader.dataset))
     epoch_acc = 100. * (valid_running_correct / len(testloader.dataset))
     # print("Per class loss: ",running_loss_per_class)
-    per_class_accu = confusion_matrix.diag()/confusion_matrix.sum(1)
+    per_class_accu = cf.diag()/cf.sum(1)
     # print("Per class accuracy: ",confusion_matrix.diag()/confusion_matrix.sum(1))
-    return epoch_loss, epoch_acc, per_class_accu, confusion_matrix
+    return epoch_loss, epoch_acc, per_class_accu, cf_matrix
