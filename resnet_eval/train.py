@@ -71,7 +71,7 @@ train_transforms = transforms.Compose([transforms.Resize(32),transforms.ToTensor
 train_set_path = TRAIN_DATASET_PATH #os.path.join(TRAIN_DATASET_PATH, "train")
 val_set_path = TEST_DATASET_PATH #os.path.join(TEST_DATASET_PATH, "test")
 
-train_loader, valid_loader, class_to_idx, cidx = load_data_set(batch_size=batch_size, train_data_dir=train_set_path, valid_data_dir=val_set_path, transforms=train_transforms)
+train_loader, valid_loader, class_to_idx = load_data_set(batch_size=batch_size, train_data_dir=train_set_path, valid_data_dir=val_set_path, transforms=train_transforms)
 
 # dataiter = iter(train_loader)
 # images, labels = next(dataiter)
